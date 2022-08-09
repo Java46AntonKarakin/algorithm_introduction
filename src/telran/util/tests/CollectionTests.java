@@ -13,23 +13,20 @@ import telran.util.Collection;
 abstract class CollectionTests {
 	protected static final int N_NUMBERS = 100;
 	protected Collection<Integer> collection;
-
 	protected abstract Collection<Integer> createCollection();
-
+	
 	Integer expected[] = { 10, -5, 13, 20, 40, 15 };
 
 	@BeforeEach
 	void setUp() throws Exception {
 		collection = createCollection();
 		fillCollection();
-
 	}
 
 	private void fillCollection() {
 		for (Integer num : expected) {
 			collection.add(num);
 		}
-
 	}
 
 	@Test

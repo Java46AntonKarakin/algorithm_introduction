@@ -94,7 +94,7 @@ public class ArrayList<T> implements List<T> {
 
 	@Override
 	public boolean add(int index, T obj) {
-		if (index < 0 || index > size+1) {
+		if (index < 0 || index > size + 1) {
 			return false;
 		}
 
@@ -111,7 +111,6 @@ public class ArrayList<T> implements List<T> {
 		if (index < 0 || index > size) {
 			return null;
 		}
-		
 		T res = array[index];
 		if (index == 0) {
 			System.arraycopy(array, index + 1, array, index, size-- - index);
@@ -120,7 +119,7 @@ public class ArrayList<T> implements List<T> {
 		} else {
 			System.arraycopy(array, index, array, index, size-- - index);
 		}
-		
+
 		return res;
 	}
 

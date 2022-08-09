@@ -60,7 +60,6 @@ public interface Collection<T> extends Iterable<T> {
 		int size = size();
 		int current = 0;
 		
-		
 		if (ar.length < size) {
 			ar = Arrays.copyOf(ar, size);
 		} else if (ar.length > size) {
@@ -68,21 +67,9 @@ public interface Collection<T> extends Iterable<T> {
 				ar[i] = null;
 			}
 		}
-		
-//		if (ar.length < size) {
-//			ar = Arrays.copyOf(ar, size);
-//		}
-
 		while (it.hasNext()) {
 			ar[current++] = it.next();
 		}
-
-//		if (ar.length > size) {
-//			int fillNullFromIndex = size - ar.length;
-//			for (; fillNullFromIndex < size - 1; fillNullFromIndex++) {
-//				ar[fillNullFromIndex] = null;
-//			}
-//		}
 		return ar;
 	}
 	
