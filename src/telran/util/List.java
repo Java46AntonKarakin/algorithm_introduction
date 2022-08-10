@@ -43,5 +43,10 @@ public interface List<T> extends Collection<T> {
 	 *         or null for wrong index value
 	 */
 	T get(int index);
+	
+	default boolean contains(Object pattern) {
+		return !(indexOf(pattern) == -1);
+	}
+	
 
 }

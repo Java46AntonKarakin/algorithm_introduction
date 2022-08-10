@@ -14,7 +14,7 @@ abstract class ListTests extends CollectionTests {
 	List<Integer> list;
 	@BeforeEach
 	void setUp() throws Exception {
-		super.setUp(); // content of the collection is {10, -5, 13, 20, 40, 15} from the setup 
+		super.setUp(); // {10, -5, 13, 20, 40, 15}
 		list = (List<Integer>)collection;
 	}
 
@@ -27,8 +27,6 @@ abstract class ListTests extends CollectionTests {
 		for(int i = 0; i < N_NUMBERS; i++) {
 			list.add(2, 100);
 		}
-		
-		int a = list.size();
 		assertEquals(size + N_NUMBERS, list.size());
 		assertEquals(100, list.get(2));
 		assertEquals(100, list.get(2 + 100 - 1));
@@ -40,6 +38,7 @@ abstract class ListTests extends CollectionTests {
 	
 	@Test
 	void removeIndexTest() {
+		// {10, -5, 13, 20, 40, 15}
 		int size = list.size();
 		assertEquals(10, list.remove(0));
 		assertEquals(--size, list.size());

@@ -53,7 +53,6 @@ public class ArrayList<T> implements List<T> {
 			if (array[i] != null && array[i].equals(pattern)) {
 				deleteElementByIndex(i);
 				flIsRemoved = true;
-				break;
 			}
 		}
 		return flIsRemoved;
@@ -72,12 +71,6 @@ public class ArrayList<T> implements List<T> {
 			}
 		}
 		return flIsRemoved;
-	}
-
-	@Override
-	public boolean contains(Object pattern) {
-
-		return indexOf(pattern) >= 0;
 	}
 
 	@Override
