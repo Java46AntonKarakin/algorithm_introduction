@@ -14,6 +14,8 @@ import telran.util.Collection;
 abstract class CollectionTests {
 	protected static final int N_NUMBERS = 10000;
 	private static final int N_RUNS = 10000;
+	private static final int N_RANDOM_RUNS = 10;
+	private static final int N_RANDOM_NUMBERS = 100;
 	protected Collection<Integer> collection;
 
 	protected abstract Collection<Integer> createCollection();
@@ -59,8 +61,23 @@ abstract class CollectionTests {
 		Predicate<Integer> allFalsePredicate = new AllFalsePredicate();
 		assertFalse(collection.removeIf(allFalsePredicate));
 		assertEquals(expected.length, collection.size());
+
+		for (int i = 0; i < N_RANDOM_RUNS; i++) {
+			fillRandomCollection();
+			collection.removeIf(new EvenNumbersPredicate());
+			for (int num : collection) {
+				assertTrue(num % 2 == 1);
+			}
+		}
 		assertTrue(collection.removeIf(allFalsePredicate.negate()));
 		assertEquals(0, collection.size());
+	}
+
+	private void fillRandomCollection() {
+		collection = createCollection();
+		for (int i = 0; i < N_RANDOM_NUMBERS; i++) {
+			collection.add((int) (Math.random() * Integer.MAX_VALUE));
+		}
 	}
 
 	@Test
@@ -87,17 +104,17 @@ abstract class CollectionTests {
 	void sizeTest() {
 		assertEquals(expected.length, collection.size());
 	}
-	
+
 	@Test
 	void wrongIteratorRemoveTest() {
 		Iterator<Integer> it = collection.iterator();
-		wrongRemove(it); //first remove
+		wrongRemove(it); // first remove
 		it.next();
 		it.next();
-		it.remove(); //two removes with no next
+		it.remove(); // two removes with no next
 		wrongRemove(it);
 	}
-	
+
 	@Test
 	void removeIfPerformanceTest() {
 		Predicate<Integer> predicate = new AllFalsePredicate().negate();
@@ -106,14 +123,15 @@ abstract class CollectionTests {
 			collection.removeIf(predicate);
 		}
 	}
+
 	private void fillLargeCollection() {
-		for(int i = 0; i < N_NUMBERS; i++) {
+		for (int i = 0; i < N_NUMBERS; i++) {
 			collection.add(i);
 		}
-		
+
 	}
 
-	protected  void wrongRemove(Iterator<Integer> it) {
+	protected void wrongRemove(Iterator<Integer> it) {
 		boolean flException = false;
 		try {
 			it.remove();

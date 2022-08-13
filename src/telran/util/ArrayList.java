@@ -110,7 +110,6 @@ public class ArrayList<T> implements List<T> {
 	}
 
 	private boolean checkExistingIndex(int index) {
-
 		return index >= 0 && index < size;
 	}
 
@@ -135,7 +134,6 @@ public class ArrayList<T> implements List<T> {
 				break;
 			}
 		}
-
 		return res;
 	}
 
@@ -144,27 +142,6 @@ public class ArrayList<T> implements List<T> {
 
 		return checkExistingIndex(index) ? array[index] : null;
 	}
-
-//	private boolean afterDeletionProcessing(int sizeAfterDeletion) {
-//		boolean res = false;
-//		if (sizeAfterDeletion < size) {
-//			res = true;
-//			for (int i = sizeAfterDeletion; i < size; i++) {
-//				array[i] = null;
-//			}
-//			size = sizeAfterDeletion;
-//		}
-//		return res;
-//	}
-
-	/*
-	 * Write the method for removing all objects matching the given predicate with
-	 * O[N] bonus: with no additional array (playing with two indexes) take into
-	 * consideration a possible memory leak (reference from index == size should be
-	 * null's)
-	 */
-
-	/* { 10, -5, 13, 20, 40, 15 }; */
 
 	@Override
 	public boolean removeIf(Predicate<T> predicate) {
@@ -185,8 +162,7 @@ public class ArrayList<T> implements List<T> {
 				}
 			}
 		}
-		size = size-mismathesCounter;
+		size = size - mismathesCounter;
 		return isMatchFound;
 	}
-
 }
