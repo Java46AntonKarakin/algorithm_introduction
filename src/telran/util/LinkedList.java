@@ -154,12 +154,13 @@ public class LinkedList<T> implements List<T> {
 		if (isFirstObjEqualsPattern(pattern)) {
 			return 0;
 		}
-
-		for (int i = 0; i < size; i++) {
-			if (isNextObjEqualsPattern(temp, pattern)) {
-				temp = head.next;
-				res = i;
-				break;
+		if (head != tail) {
+			for (int i = 0; i < size; i++) {
+				if (isNextObjEqualsPattern(temp, pattern)) {
+					temp = head.next;
+					res = i;
+					break;
+				}
 			}
 		}
 		return res;
@@ -300,15 +301,25 @@ public class LinkedList<T> implements List<T> {
 	}
 
 	private void removeTailElement() {
-		tail = tail.prev;
-		tail.next = null;
-		size--;
+		if (head == tail) {
+			head = tail = null;
+			size--;
+		} else {
+			tail = tail.prev;
+			tail.next = null;
+			size--;
+		}
 	}
 
 	private void removeHeadElement() {
-		head = head.next;
-		head.prev = null;
-		size--;
+		if (head == tail) {
+			head = tail = null;
+			size--;
+		} else {
+			head = head.next;
+			head.prev = null;
+			size--;
+		}
 	}
 
 	private void removeMiddleElement(Node<T> current) {

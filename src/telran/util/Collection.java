@@ -11,10 +11,7 @@ public interface Collection<T> extends Iterable<T> {
 	 * @param obj
 	 * @return true if added
 	 */
-	default boolean add(T obj) {
-
-		return true;
-	}
+	boolean add(T obj);
 
 	/***************************************/
 	/**
