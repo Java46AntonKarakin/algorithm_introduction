@@ -1,5 +1,6 @@
 package telran.util.tests;
 
+
 import telran.util.ArrayList;
 import telran.util.Collection;
 
@@ -10,5 +11,6 @@ public class ArrayListTests extends ListTests {
 		
 		return new ArrayList<>();
 	}
+	
 
 }

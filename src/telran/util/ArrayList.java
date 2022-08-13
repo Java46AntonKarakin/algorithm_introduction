@@ -2,7 +2,6 @@ package telran.util;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 public class ArrayList<T> implements List<T> {
@@ -20,20 +19,40 @@ public class ArrayList<T> implements List<T> {
 	}
 
 	private class ArrayListIterator implements Iterator<T> {
-		int currentIndex = 0;
+		int currentInd = 0;
+		boolean flNext = false;
 
 		@Override
 		public boolean hasNext() {
-			return currentIndex < size;
+
+			return currentInd < size;
 		}
 
 		@Override
 		public T next() {
-			if (!hasNext()) {
-				throw new NoSuchElementException();
-			}
-			return array[currentIndex++];
+			flNext = true;
+			return array[currentInd++];
 		}
+
+		@Override
+		public void remove() {
+			if (!flNext) {
+				throw new IllegalStateException();
+			}
+			ArrayList.this.remove(--currentInd);
+			flNext = false;
+		}
+	}
+
+	@Override
+	public T remove(int index) {
+		T res = null;
+		if (checkExistingIndex(index)) {
+			res = array[index];
+			removeByIndex(index);
+
+		}
+		return res;
 	}
 
 	@Override
@@ -42,35 +61,25 @@ public class ArrayList<T> implements List<T> {
 			array = Arrays.copyOf(array, size * 2);
 		}
 		array[size++] = obj;
-
 		return true;
 	}
 
 	@Override
 	public boolean remove(Object pattern) {
-		boolean flIsRemoved = false;
-		for (int i = 0; i < array.length; i++) {
-			if (array[i] != null && array[i].equals(pattern)) {
-				deleteElementByIndex(i);
-				flIsRemoved = true;
-			}
+		boolean res = false;
+		int index = indexOf(pattern);
+		if (index >= 0) {
+			res = true;
+			removeByIndex(index);
 		}
-		return flIsRemoved;
+
+		return res;
 	}
 
-	@Override
-	public boolean removeIf(Predicate<T> predicate) {
-		boolean flIsRemoved = false;
-		int index = 0;
-		while (index != size && array[index] != null) {
-			if (predicate.test(array[index])) {
-				deleteElementByIndex(index);
-				flIsRemoved = true;
-			} else {
-				index++;
-			}
-		}
-		return flIsRemoved;
+	private void removeByIndex(int index) {
+		size--;
+		System.arraycopy(array, index + 1, array, index, size - index);
+		array[size] = null;
 	}
 
 	@Override
@@ -87,65 +96,97 @@ public class ArrayList<T> implements List<T> {
 
 	@Override
 	public boolean add(int index, T obj) {
-		if (index < 0 || index > size + 1) {
-			return false;
+		boolean res = false;
+		if (index >= 0 && index <= size) {
+			res = true;
+			if (size == array.length) {
+				array = Arrays.copyOf(array, size * 2);
+			}
+			System.arraycopy(array, index, array, index + 1, size - index);
+			array[index] = obj;
+			size++;
 		}
+		return res;
+	}
 
-		if (size == array.length) {
-			array = Arrays.copyOf(array, size * 2);
-		}
-		System.arraycopy(array, index, array, index + 1, size++ - index);
-		array[index] = obj;
-		return true;
+	private boolean checkExistingIndex(int index) {
+
+		return index >= 0 && index < size;
 	}
 
 	@Override
-	public T remove(int index) {
-		if (index < 0 || index > size) {
-			return null;
+	public int indexOf(Object pattern) {
+		int res = -1;
+		for (int i = 0; i < size; i++) {
+			if (array[i].equals(pattern)) {
+				res = i;
+				break;
+			}
 		}
-		T res = array[index];
-		if (index == 0) {
-			System.arraycopy(array, index + 1, array, index, size-- - index);
-		} else if (index == size) {
-			array[index] = null;
-		} else {
-			System.arraycopy(array, index, array, index, size-- - index);
+		return res;
+	}
+
+	@Override
+	public int lastIndexOf(Object pattern) {
+		int res = -1;
+		for (int i = size - 1; i >= 0; i--) {
+			if (array[i].equals(pattern)) {
+				res = i;
+				break;
+			}
 		}
 
 		return res;
 	}
 
 	@Override
-	public int indexOf(Object pattern) {
-		int indexCounter = 0;
-		for (T obj : array) {
-			if (pattern.equals(obj)) {
-				return indexCounter;
-			}
-			indexCounter++;
-		}
-		return -1;
-	}
-
-	@Override
-	public int lastIndexOf(Object pattern) {
-		for (int i = size; i >= 0; i--) {
-			if (pattern.equals(array[i])) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	@Override
 	public T get(int index) {
-		return (index >= 0 && index < size) ? array[index] : null;
+
+		return checkExistingIndex(index) ? array[index] : null;
 	}
 
-	private T[] deleteElementByIndex(int index) {
-		System.arraycopy(array, index + 1, array, index, size-- - index);
-		array[size] = null;
-		return array;
+//	private boolean afterDeletionProcessing(int sizeAfterDeletion) {
+//		boolean res = false;
+//		if (sizeAfterDeletion < size) {
+//			res = true;
+//			for (int i = sizeAfterDeletion; i < size; i++) {
+//				array[i] = null;
+//			}
+//			size = sizeAfterDeletion;
+//		}
+//		return res;
+//	}
+
+	/*
+	 * Write the method for removing all objects matching the given predicate with
+	 * O[N] bonus: with no additional array (playing with two indexes) take into
+	 * consideration a possible memory leak (reference from index == size should be
+	 * null's)
+	 */
+
+	/* { 10, -5, 13, 20, 40, 15 }; */
+
+	@Override
+	public boolean removeIf(Predicate<T> predicate) {
+		int mismathesCounter = 0;
+		boolean isMatchFound = false;
+		for (int i = 0; i < size; i++) {
+			if (isMatchFound) {
+				if (predicate.test(array[i])) {
+					mismathesCounter++;
+					array[i] = null;
+				} else {
+					array[i - mismathesCounter] = array[i];
+				}
+			} else {
+				if (predicate.test(array[i])) {
+					isMatchFound = true;
+					mismathesCounter++;
+				}
+			}
+		}
+		size = size-mismathesCounter;
+		return isMatchFound;
 	}
+
 }
