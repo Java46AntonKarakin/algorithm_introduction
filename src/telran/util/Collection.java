@@ -62,6 +62,7 @@ public interface Collection<T> extends Iterable<T> {
 	 * 
 	 * @param ar
 	 * @return regular Java array containing all the collection object
+	 * 
 	 */
 	default T[] toArray(T[] ar) {
 		Iterator<T> it = iterator();
@@ -75,6 +76,7 @@ public interface Collection<T> extends Iterable<T> {
 				ar[i] = null;
 			}
 		}
+		
 		while (it.hasNext()) {
 			ar[current++] = it.next();
 		}

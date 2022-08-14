@@ -97,7 +97,6 @@ abstract class CollectionTests {
 		for (int i = collection.size(); i < expected2.length; i++) {
 			assertNull(expected2[i]);
 		}
-
 	}
 
 	@Test
