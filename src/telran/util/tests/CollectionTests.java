@@ -15,7 +15,8 @@ abstract class CollectionTests {
 	protected static final int N_NUMBERS = 10000;
 	private static final int N_RUNS = 10000;
 	private static final int N_RANDOM_RUNS = 10;
-	private static final int N_RANDOM_NUMBERS = 100;
+	private static final int N_RANDOM_NUMBERS = 1000;
+	private static final int N_RANDOM_NUMBERS_SMALL = 1000;
 	protected Collection<Integer> collection;
 
 	protected abstract Collection<Integer> createCollection();
@@ -26,14 +27,12 @@ abstract class CollectionTests {
 	void setUp() throws Exception {
 		collection = createCollection();
 		fillCollection();
-
 	}
 
 	private void fillCollection() {
 		for (Integer num : expected) {
 			collection.add(num);
 		}
-
 	}
 
 	@Test
@@ -58,19 +57,62 @@ abstract class CollectionTests {
 
 	@Test
 	void removeIfTest() {
+
 		Predicate<Integer> allFalsePredicate = new AllFalsePredicate();
 		assertFalse(collection.removeIf(allFalsePredicate));
 		assertEquals(expected.length, collection.size());
 
-		for (int i = 0; i < N_RANDOM_RUNS; i++) {
-			fillRandomCollection();
-			collection.removeIf(new EvenNumbersPredicate());
-			for (int num : collection) {
-				assertTrue(num % 2 == 1);
-			}
+		/*-----------------------------------------------------------------------*/
+		fillTenCollection();
+		Integer[] arAll = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		Integer[] arAllFromCollection = collection.toArray(new Integer[0]);
+
+		assertArrayEquals(arAll, arAllFromCollection);
+
+		/*-----------------------------------------------------------------------*/
+//		fillRandomCollection();  // error
+		fillRandomSmallCollection();
+		collection.removeIf(new EvenNumbersPredicate());
+		Integer[] arNoEvenFromCollection = collection.toArray(new Integer[0]);
+
+		for (Integer num : arNoEvenFromCollection) {
+			assertTrue(num % 2 == 1);
 		}
+
+		/*-----------------------------------------------------------------------*/
+//		fillRandomCollection();  // error
+		fillRandomSmallCollection();
+		collection.removeIf(new EvenNumbersPredicate().negate());
+		Integer[] ararNoOddFromCollection = collection.toArray(new Integer[0]);
+
+		for (Integer num : ararNoOddFromCollection) {
+			assertTrue(num % 2 != 1);
+		}
+
+		collection.removeIf(new EvenNumbersPredicate());
+		for (int num : collection) {
+			assertTrue(num % 2 == 1);
+		}
+
+//		fillRandomCollection();  // error
+		fillRandomSmallCollection();
 		assertTrue(collection.removeIf(allFalsePredicate.negate()));
 		assertEquals(0, collection.size());
+	}
+
+	private void fillTenCollection() {
+		collection = createCollection();
+		for (int i = 0; i < 10; i++) {
+			collection.add(i);
+		}
+		
+	}
+
+	private void fillRandomSmallCollection () {
+		collection = createCollection();
+		for (int i = 0; i < N_RANDOM_NUMBERS_SMALL; i++) {
+			collection.add(i);
+		}
 	}
 
 	private void fillRandomCollection() {

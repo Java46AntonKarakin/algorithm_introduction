@@ -28,41 +28,69 @@ public class HashSet<T> implements Set<T> {
 		boolean isThisListDone = false; // true if current list has been completely iterated
 		int indexHashTable = 0;
 		int indexList = 0;
-//		Integer curListSize = hashTable[currentPositionInHashTable].size();
-		T res;
-		int hashTableLength = hashTable.length;
+		int prevIndexHashTable = 0;
+		int prevIndexList = 0;
+		boolean removeable = false;
+		boolean isCurPositionChecked = false;
+		T current;
 
 		@Override
 		public boolean hasNext() {
-			return indexHashTable < hashTableLength;
+			isCurPositionChecked = findList();
+			return isCurPositionChecked;
 		}
 
 		@Override
 		public T next() {
-			checkhasNext();
-			
-
-			while (!isIterable()) {
-				if (isThisListDone) {
-					isThisListDone = false;
+			if (!isCurPositionChecked) {
+				if (!hasNext()) {
+					throw new NoSuchElementException();
 				}
-				indexHashTable++;
 			}
-
-			checkhasNext();
-
+			isCurPositionChecked = false;
 			getNextObj();
-			return res;
+			moveToNextNextObj();
+			removeable = true;
+			return current;
 		}
-
 
 		@Override
 		public void remove() {
-			
+			if (!removeable) {
+				throw new IllegalStateException();
+			}
+			hashTable[prevIndexHashTable].remove(prevIndexList);
+			if (hashTable[prevIndexHashTable].size() == 0) {
+				hashTable[prevIndexHashTable] = null;
+			}
+			removeable = false;
+			size--;
 		}
 
-		private T getNextObj() {
-			res = hashTable[indexHashTable].get(indexList++);
+		private boolean findList() {
+			boolean res = isIterable();
+			while (!res) {
+				if (isThisListDone) {
+					isThisListDone = false;
+				}
+				if (!(indexHashTable < hashTable.length)) {
+					res = false;
+					break;
+				}
+				indexHashTable++;
+				res = isIterable();
+			}
+			return res;
+		}
+
+		private void getNextObj() {
+			current = hashTable[indexHashTable].get(indexList++);
+			prevIndexHashTable = indexHashTable;
+			prevIndexList = indexList - 1;
+		}
+
+		private void moveToNextNextObj() {
+
 			if (indexList >= hashTable[indexHashTable].size()) {
 				isThisListDone = true;
 				indexList = 0;
@@ -70,30 +98,17 @@ public class HashSet<T> implements Set<T> {
 			} else {
 				indexList++;
 			}
-			return res;
 		}
 
 		private boolean isIterable() {
-			boolean res = true;
-			if (hashTable[indexHashTable] == null || indexHashTable > hashTableLength) {
-				res = false;
-			}
-			return res;
+			boolean res = indexHashTable < hashTable.length;
+			return res ? hashTable[indexHashTable] != null : false;
 		}
-		
-		private void checkhasNext() {
-			if (!hasNext()) {
-				throw new NoSuchElementException();
-			}
-		}
-
 	}
 
 	@Override
 
 	public boolean add(T obj) {
-		// set can not have two equal objects
-		// that's why the method returns false at adding an object that already exists
 		boolean res = false;
 		if (!contains(obj)) {
 			res = true;
@@ -111,7 +126,7 @@ public class HashSet<T> implements Set<T> {
 	}
 
 	private void recreateHashTable() {
-		HashSet<T> tmp = new HashSet<>(hashTable.length * 2); // tmp hashset has table with twice capacity
+		HashSet<T> tmp = new HashSet<>(hashTable.length * 2);
 		for (List<T> list : hashTable) {
 			if (list != null) {
 				for (T obj : list) {
@@ -158,7 +173,6 @@ public class HashSet<T> implements Set<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-
 		return new HashSetIterator();
 	}
 

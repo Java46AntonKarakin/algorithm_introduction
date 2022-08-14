@@ -113,11 +113,8 @@ public class LinkedList<T> implements List<T> {
 		if (!checkExistingIndex(index) || index > size) {
 			return null;
 		}
-		Node<T> current = head;
-
-		for (int i = 0; i < index; i++) {
-			current = current.next;
-		}
+		
+		Node<T> current = getNodeByIndex(index);
 
 		if (index == 0) {
 			removeHeadElement();
@@ -186,8 +183,7 @@ public class LinkedList<T> implements List<T> {
 	public T get(int index) {
 		T res = null;
 		if (checkExistingIndex(index)) {
-			Node<T> node = getNodeByIndex(index);
-			res = node.obj;
+			res = getNodeByIndex(index).obj;
 		}
 		return res;
 	}
