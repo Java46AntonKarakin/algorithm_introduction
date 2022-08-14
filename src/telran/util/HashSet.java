@@ -67,7 +67,7 @@ public class HashSet<T> implements Set<T> {
 			size--;
 		}
 
-		private boolean findList() {
+		private boolean findList() { 
 			boolean res = isIterable();
 			while (!res) {
 				if (isThisListDone) {
