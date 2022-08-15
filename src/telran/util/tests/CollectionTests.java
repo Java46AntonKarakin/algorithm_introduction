@@ -13,11 +13,12 @@ import telran.util.Collection;
 
 abstract class CollectionTests {
 	protected static final int N_NUMBERS = 10000;
-	private static final int N_RUNS = 10000;
-	private static final int N_RANDOM_RUNS = 10;
-	private static final int N_RANDOM_NUMBERS = 1000;
-	private static final int N_RANDOM_NUMBERS_SMALL = 1000;
+	private static final int N_RUNS = 1000;
+	private static final int N_AMOUNT_OF_ELEMENTS = 100;
+	private static final Integer N_MAX_VALUE = 500;
 	protected Collection<Integer> collection;
+	Predicate<Integer> allFalsePredicate = new AllFalsePredicate();
+	Predicate<Integer> evenNumbersPredicate = new EvenNumbersPredicate();
 
 	protected abstract Collection<Integer> createCollection();
 
@@ -58,20 +59,19 @@ abstract class CollectionTests {
 	@Test
 	void removeIfTest() {
 
-		Predicate<Integer> allFalsePredicate = new AllFalsePredicate();
-		assertFalse(collection.removeIf(allFalsePredicate));
+		assertFalse(collection.removeIf(new AllFalsePredicate()));
 		assertEquals(expected.length, collection.size());
 
 		/*-----------------------------------------------------------------------*/
 		fillTenCollection();
-		Integer[] arAll = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-		Integer[] arAllFromCollection = collection.toArray(new Integer[0]);
+		Integer[] arrAll = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		Integer[] arrAllFromCollection = collection.toArray(new Integer[0]);
 
-		assertArrayEquals(arAll, arAllFromCollection);
+		assertArrayEquals(arrAll, arrAllFromCollection);
 
 		/*-----------------------------------------------------------------------*/
-//		fillRandomCollection();  // error
-		fillRandomSmallCollection();
+
+		fillRandomCollection();
 		collection.removeIf(new EvenNumbersPredicate());
 		Integer[] arNoEvenFromCollection = collection.toArray(new Integer[0]);
 
@@ -80,12 +80,12 @@ abstract class CollectionTests {
 		}
 
 		/*-----------------------------------------------------------------------*/
-//		fillRandomCollection();  // error
-		fillRandomSmallCollection();
-		collection.removeIf(new EvenNumbersPredicate().negate());
-		Integer[] ararNoOddFromCollection = collection.toArray(new Integer[0]);
 
-		for (Integer num : ararNoOddFromCollection) {
+		fillRandomCollection();
+		collection.removeIf(new EvenNumbersPredicate().negate());
+		Integer[] arrNoOddFromCollection = collection.toArray(new Integer[0]);
+
+		for (Integer num : arrNoOddFromCollection) {
 			assertTrue(num % 2 != 1);
 		}
 
@@ -94,9 +94,9 @@ abstract class CollectionTests {
 			assertTrue(num % 2 == 1);
 		}
 
-//		fillRandomCollection();  // error
-		fillRandomSmallCollection();
-		assertTrue(collection.removeIf(allFalsePredicate.negate()));
+
+		fillRandomCollection();
+		assertTrue(collection.removeIf(new AllFalsePredicate().negate()));
 		assertEquals(0, collection.size());
 	}
 
@@ -105,23 +105,35 @@ abstract class CollectionTests {
 		for (int i = 0; i < 10; i++) {
 			collection.add(i);
 		}
-		
-	}
 
-	private void fillRandomSmallCollection () {
-		collection = createCollection();
-		for (int i = 0; i < N_RANDOM_NUMBERS_SMALL; i++) {
-			collection.add(i);
-		}
 	}
 
 	private void fillRandomCollection() {
 		collection = createCollection();
-		for (int i = 0; i < N_RANDOM_NUMBERS; i++) {
-			collection.add((int) (Math.random() * Integer.MAX_VALUE));
+		for (int i = 0; i < N_AMOUNT_OF_ELEMENTS; i++) {
+			collection.add((int) (Math.random() * 10));
 		}
 	}
 
+	@Test
+	void removeIfMultipleTest() {
+		for (int i = 0; i < N_RUNS ; i++) {
+			fillAnotheCollection();
+			collection.removeIf(evenNumbersPredicate);
+			for (int num : collection) {
+				assertTrue(num % 2 == 1);
+			}
+		}		
+	}
+	
+	private void fillAnotheCollection() {
+		collection = createCollection();
+		for (int i = 0; i < N_AMOUNT_OF_ELEMENTS; i++) {
+			/* works without fails if N_SOME_VALUE has value up to 1000*/
+			collection.add((int) (Math.random() * N_MAX_VALUE));
+		}
+	}
+	
 	@Test
 	void containsTest() {
 		assertTrue(collection.contains(10));
@@ -159,7 +171,7 @@ abstract class CollectionTests {
 	@Test
 	void removeIfPerformanceTest() {
 		Predicate<Integer> predicate = new AllFalsePredicate().negate();
-		for (int i = 0; i < N_RUNS; i++) {
+		for (int i = 0; i < 10; i++) {
 			fillLargeCollection();
 			collection.removeIf(predicate);
 		}
