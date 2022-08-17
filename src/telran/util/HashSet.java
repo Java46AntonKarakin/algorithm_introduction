@@ -4,117 +4,93 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class HashSet<T> implements Set<T> {
-	private static final double DEFAULT_FACTOR = 0.75;
-	private static final int DEFAULT_HASH_TABLE_CAPACITY = 16;
-	private List<T>[] hashTable;
-	private int size;
-	private double factor;
+private static final double DEFAULT_FACTOR = 0.75;
+private static final int DEFAULT_HASH_TABLE_CAPACITY = 16;
+private List<T> [] hashTable;
+private int size;
+private double factor ;
+@SuppressWarnings("unchecked")
+public HashSet(int hashTableCapacity, double factor) {
+	this.factor = factor;
+	hashTable = new List[hashTableCapacity];
+}
+public HashSet(int hashTableCapacity) {
+	this(hashTableCapacity, DEFAULT_FACTOR);
+}
+public HashSet() {
+	this(DEFAULT_HASH_TABLE_CAPACITY, DEFAULT_FACTOR);
+}
 
-	@SuppressWarnings("unchecked")
-	public HashSet(int hashTableCapacity, double factor) {
-		this.factor = factor;
-		hashTable = new List[hashTableCapacity];
+private class HashSetIterator implements Iterator<T> {
+	Iterator<T> currentIterator;
+	Iterator<T> prevIterator;
+	int indexIterator = 0;
+	boolean flNext = false;
+	HashSetIterator() {
+
+		getCurrentIterator();
 	}
-
-	public HashSet(int hashTableCapacity) {
-		this(hashTableCapacity, DEFAULT_FACTOR);
-	}
-
-	public HashSet() {
-		this(DEFAULT_HASH_TABLE_CAPACITY, DEFAULT_FACTOR);
-	}
-
-	private class HashSetIterator implements Iterator<T> {
-		boolean isThisListDone = false; // true if current list has been completely iterated
-		int indexHashTable = 0;
-		int indexList = 0;
-		int prevIndexHashTable = 0;
-		int prevIndexList = 0;
-		boolean removeable = false;
-		boolean isCurPositionChecked = false;
-		T current;
-
 		@Override
 		public boolean hasNext() {
-			isCurPositionChecked = findList();
-			return isCurPositionChecked;
+			return currentIterator != null;
 		}
 
 		@Override
 		public T next() {
-			if (!isCurPositionChecked) {
-				if (!hasNext()) {
-					throw new NoSuchElementException();
-				}
+			if (!hasNext()) {
+				throw new NoSuchElementException();
 			}
-			isCurPositionChecked = false;
-			getNextObj();
-			moveToNextNextObj();
-			removeable = true;
-			return current;
+			T res = currentIterator.next();
+			prevIterator = currentIterator;
+			getCurrentIterator();
+			flNext = true;
+			return res;
+		}
+		private void getCurrentIterator() {
+			if (currentIterator == null || !currentIterator.hasNext()) {
+				Iterator<T> it = null;
+				while(it == null || !it.hasNext()) {
+					List<T> list = getList();
+					indexIterator++;
+					if (list == null) {
+						currentIterator = null;
+						return;
+					}
+					it = list.iterator();
+				}
+				currentIterator = it;
+			}
+		}
+
+		private List<T> getList() {
+			while(indexIterator < hashTable.length &&
+					hashTable[indexIterator] == null) {
+				indexIterator++;
+			}
+			return indexIterator < hashTable.length ?
+					hashTable[indexIterator] : null;
 		}
 
 		@Override
 		public void remove() {
-			if (!removeable) {
+			if(!flNext) {
 				throw new IllegalStateException();
 			}
-			hashTable[prevIndexHashTable].remove(prevIndexList);
-			if (hashTable[prevIndexHashTable].size() == 0) {
-				hashTable[prevIndexHashTable] = null;
-			}
-			removeable = false;
+			prevIterator.remove();
+			flNext = false;
 			size--;
 		}
-
-		private boolean findList() {  
-			boolean res = isIterable();
-			while (!res) {
-				if (isThisListDone) {
-					isThisListDone = false;
-				}
-				if (!(indexHashTable < hashTable.length)) {
-					res = false;
-					break;
-				}
-				indexHashTable++;
-				res = isIterable();
-			}
-			return res;
-		}
-
-		private void getNextObj() {
-			current = hashTable[indexHashTable].get(indexList++);
-			prevIndexHashTable = indexHashTable;
-			prevIndexList = indexList - 1;
-		}
-
-		private void moveToNextNextObj() {
-
-			if (indexList >= hashTable[indexHashTable].size()) {
-				isThisListDone = true;
-				indexList = 0;
-				indexHashTable++;
-			} else {
-				indexList++;
-			}
-		}
-
-		private boolean isIterable() {
-			boolean res = indexHashTable < hashTable.length;
-			return res ? hashTable[indexHashTable] != null : false;
-		}
-	}
-
+}
 	@Override
-
 	public boolean add(T obj) {
+		// set can not have two equal objects
+		// that's why the method returns false at adding an object that already exists
 		boolean res = false;
 		if (!contains(obj)) {
 			res = true;
 			if (size >= hashTable.length * factor) {
 				recreateHashTable();
-			}
+			} 
 			int hashTableInd = getHashTableIndex(obj.hashCode());
 			if (hashTable[hashTableInd] == null) {
 				hashTable[hashTableInd] = new LinkedList<T>();
@@ -126,10 +102,10 @@ public class HashSet<T> implements Set<T> {
 	}
 
 	private void recreateHashTable() {
-		HashSet<T> tmp = new HashSet<>(hashTable.length * 2);
-		for (List<T> list : hashTable) {
+		HashSet<T> tmp = new HashSet<>(hashTable.length * 2); //tmp hashset has table with twice capacity
+		for (List<T> list: hashTable) {
 			if (list != null) {
-				for (T obj : list) {
+				for(T obj: list) {
 					tmp.add(obj);
 				}
 			}
@@ -167,12 +143,13 @@ public class HashSet<T> implements Set<T> {
 
 	@Override
 	public int size() {
-
+		
 		return size;
 	}
 
 	@Override
 	public Iterator<T> iterator() {
+		
 		return new HashSetIterator();
 	}
 

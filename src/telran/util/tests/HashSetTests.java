@@ -15,27 +15,26 @@ public class HashSetTests extends SetTests {
 
 	@Override
 	protected Collection<Integer> createCollection() {
-
+		
 		return new HashSet<>();
 	}
-
-	@Override
 	@Test
+	@Override
 	void toArrayTest() {
-		Integer[] expected1 = { 10, -5, 13, 20, 40, 15 };
-		Integer[] target = collection.toArray(new Integer[0]);
-		assertTrue(expected1.length == target.length);
-
-		Arrays.sort(expected1);
-		Arrays.sort(target);
-
-		assertArrayEquals(expected1, target);
-		assertTrue(expected1 == collection.toArray(expected1));
+		Arrays.sort(expected);
+		Integer actual[] = collection.toArray(new Integer[0]);
+		Arrays.sort(actual);
+		assertArrayEquals(expected, actual);
+		assertTrue(expected == collection.toArray(expected));
+		Arrays.sort(expected);
 		Integer expected2[] = new Integer[100];
 		assertTrue(expected2 == collection.toArray(expected2));
-		assertArrayEquals(expected1, Arrays.copyOf(expected2, collection.size()));
+		Integer actual2[] = Arrays.copyOf(expected2, collection.size());
+		Arrays.sort(actual2);
+		assertArrayEquals(expected, actual2);
 		for (int i = collection.size(); i < expected2.length; i++) {
 			assertNull(expected2[i]);
 		}
 	}
+
 }
