@@ -15,7 +15,7 @@ abstract class CollectionTests {
 	protected static final int N_NUMBERS = 10000;
 	private static final int N_RUNS = 1000;
 	private static final int N_AMOUNT_OF_ELEMENTS = 100;
-	private static final Integer N_MAX_VALUE = 500;
+	private static final Integer N_MAX_VALUE = Integer.MAX_VALUE;
 	protected Collection<Integer> collection;
 	Predicate<Integer> allFalsePredicate = new AllFalsePredicate();
 	Predicate<Integer> evenNumbersPredicate = new EvenNumbersPredicate();
