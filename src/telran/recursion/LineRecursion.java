@@ -1,64 +1,69 @@
 package telran.recursion;
 
-import java.util.Arrays;
-
 public class LineRecursion {
-
-	public static long factorial(int n) {
-
-		if (n == 0) {
-			return 1;
-		}
-		return n * factorial(n - 1);
+public static long factorial(int n) {
+	if(n == 0) {
+		return 1;
 	}
-
-	/**
-	 * 
-	 * @param a - negative value is possible
-	 * @param b - positive only
-	 * @return a ^ b
-	 * 
-	 * idea - sum of the two squares of the previous value
-	 * 
-	 */
-	public static long pow(int a, int b) {
-		if (b < 0) {
-			return 0;
-		} else if (b == 0){
-			return 1;
-		} else if (b % 2 == 0) {
-			return pow(square(a), b / 2);
-		} else {
-			return a + a + pow(a, b - 1);
-		}
+	return  n * factorial(n - 1);
+}
+/**
+ * 
+ * @param a either negative or positive
+ * @param b positive
+ * @return a ^ b
+ */
+static public long pow (int a, int b) {
+	if (b < 0) {
+		throw new IllegalArgumentException(" power can't be a negative");
 	}
-
-	public static Integer square(int x) {
-		if (x == 0) {
-			return 0;
-		}
-		if (x == 1) {
-			return 1;
-		}
-		
-		return x + x - 1 + square(x - 1);
+	if (b == 0) {
+		return 1;
 	}
+	return multiply(a, pow(a, b - 1));
+}
 
-	/**
-	 * 
-	 * @param ar
-	 * @return sum of numbers from the given array
-	 */
-	public static int sum(int ar[]) {
-		return sum(0, ar);
+private static long multiply(int x, long y) {
+	if (y < 0) {
+		return multiply(-x, -y);
 	}
-
-	private static int sum(int firstIndex, int[] ar) {
-		if (firstIndex == ar.length) {
-			return 0;
-		}
-		return ar[firstIndex] + sum(firstIndex + 1, ar);
-
+	if (y == 0) {
+		return 0;
 	}
+	return  x + multiply(x, y - 1);
+}
+/**
+ * 
+ * @param x
+ * @return x ^ 2
+ */
+public static int square(int x) {
+	//no cycles
+	//no * / allowed
+	//no call any additional function
+	//no static fields
+	if (x < 0) {
+		return square(-x);
+	}
+	if (x == 1) {
+		return 1;
+	}
+	//(x - 1)^2 = x^2 - 2x + 1 => x^2 = (x - 1)^2 + 2x -1
+	return x + x - 1 + square(x - 1);
+}
+/**
+ * 
+ * @param ar - array of integer numbers
+ * @return sum of all numbers from the given array
+ */
+public static int sum(int ar[]) {
+	return sum(0, ar);
+}
 
+private static int sum(int firstIndex, int[] ar) {
+	if (firstIndex == ar.length) {
+		return 0;
+	}
+	return ar[firstIndex] + sum(firstIndex + 1, ar);
+}
 }

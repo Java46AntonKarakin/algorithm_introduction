@@ -252,32 +252,23 @@ public class LinkedList<T> implements List<T> {
 	 * reverse - {30, -5. 10}
 	 */
 	public void reverse() {
-		if (size % 2 == 0) {
-			reverseObjectsEvenSize(0, size - 1);
-		} else {
-			reverseObjectsOddSize(0, size - 1);
+		if (head != null) {
+			reverse(head, tail);
 		}
 	}
 
-	private void reverseObjectsEvenSize(int begin, int end) {
-		reverseObjects(begin, end);
-		if ((end - begin) > 2) {
-			reverseObjectsEvenSize(begin + 1, end - 1);
+	private void reverse(Node<T> left, Node<T> right) {
+		if (left != right && left.prev != right) {
+			swap(left, right);
+			reverse(left.next, right.prev);
 		}
+
 	}
 
-	private void reverseObjectsOddSize(int begin, int end) {
-		reverseObjects(begin, end);
-		if ((end - begin) > 0) {
-			reverseObjectsOddSize(begin + 1, end - 1);
-		}
+	private void swap(Node<T> left, Node<T> right) {
+		T tmp = left.obj;
+		left.obj = right.obj;
+		right.obj = tmp;
 	}
 
-	private void reverseObjects(int begin, int end) {
-		Node<T> rightNode = getNodeIndex(end);
-		Node<T> leftNode = getNodeIndex(begin);
-		T temp = rightNode.obj;
-		rightNode.obj = leftNode.obj;
-		leftNode.obj = temp;
-	}
 }
