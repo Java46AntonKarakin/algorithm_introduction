@@ -53,10 +53,12 @@ public static int square(int x) {
 }
 /**
  * 
- * @param ar - array of integer numbers
+ * @param ar - array of in teger numbers
  * @return sum of all numbers from the given array
  */
 public static int sum(int ar[]) {
+	
+	//no cycles
 	return sum(0, ar);
 }
 

@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import javax.naming.OperationNotSupportedException;
-
 public class TreeSet<T> implements SortedSet<T> {
 	private static class Node<T> {
 		T obj;
@@ -18,8 +16,8 @@ public class TreeSet<T> implements SortedSet<T> {
 		}
 	}
 
-	private static final String FILL_SYMBOLS = " ";
-
+	private Node <T> [] arrayOfOrderedNodes;
+	private static final String FILL_SYMBOL = " ";
 	private static final int N_SYMBOLS_PER_LEVEL = 2;
 
 	private Node<T> root;
@@ -31,6 +29,14 @@ public class TreeSet<T> implements SortedSet<T> {
 			node = node.left;
 		}
 		return node;
+	}
+
+	private Node<T> getGreaterParent(Node<T> node) {
+
+		while (node.parent != null && node.parent.left != node) {
+			node = node.parent;
+		}
+		return node.parent;
 	}
 
 	private class TreeSetIterator implements Iterator<T> {
@@ -58,15 +64,6 @@ public class TreeSet<T> implements SortedSet<T> {
 
 		private void updateCurrent() {
 			current = current.right != null ? getLeastNodeFrom(current.right) : getGreaterParent(current);
-
-		}
-
-		private Node<T> getGreaterParent(Node<T> node) {
-
-			while (node.parent != null && node.parent.left != node) {
-				node = node.parent;
-			}
-			return node.parent;
 		}
 
 		@Override
@@ -257,19 +254,23 @@ public class TreeSet<T> implements SortedSet<T> {
 	}
 
 	private void displayRotated(Node<T> root, int level) {
-
 		if (root != null) {
 			displayRotated(root.right, level + 1);
 			displayRoot(root, level);
 			displayRotated(root.left, level + 1);
 		}
+
+	}
+
+	private void displayRoot(Node<T> root, int level) {
+		System.out.printf("%s%s\n", FILL_SYMBOL.repeat(level * N_SYMBOLS_PER_LEVEL), root.obj);
 	}
 
 	public void displayAsDirectory() {
 		displayAsDirectory(root, 0);
 	}
-	public void displayAsDirectory(Node<T> root, int level) {
-		
+
+	private void displayAsDirectory(Node<T> root, int level) {
 		if (root != null) {
 			displayRoot(root, level);
 			displayAsDirectory(root.left, level + 1);
@@ -278,7 +279,6 @@ public class TreeSet<T> implements SortedSet<T> {
 	}
 
 	public int height() {
-
 		return height(root);
 	}
 
@@ -293,41 +293,76 @@ public class TreeSet<T> implements SortedSet<T> {
 	}
 
 	public int width() {
+
 		return width(root);
 	}
 
 	private int width(Node<T> root) {
 		int res = 0;
 		if (root != null) {
-
 			res = root.left == null && root.right == null ? 1 : width(root.left) + width(root.right);
+
 		}
 		return res;
 	}
-	
+
 	/**
-	 * swap of left and right subtrees
+	 * tree inversion - swap of left and right subtrees
 	 */
-	public void inversion () {
-		inversion(root, 0);
+	public void inversion() {
+		inversion(root);
+		comp = comp.reversed();
 	}
-	
-	private void inversion(Node<T> root, int level) {
+
+	private void inversion(Node<T> root) {
 		if (root != null) {
-			switchLeftToRight(root);
-			inversion(root.left, level + 1);
-			inversion(root.right, level + 1);
+			Node<T> tmp = root.left;
+			root.left = root.right;
+			root.right = tmp;
+			inversion(root.left);
+			inversion(root.right);
 		}
 	}
 
-	private void switchLeftToRight(Node<T> root) {
-		Node<T> temp = root.left;
-		root.left = root.right;
-		root.right = temp;
+	// create sorted Node<T>[];
+	// balance creates new root for each part [left, right] of Node<T>[]
+	// root.left = balance called from left (left, rootIndex-1)
+	// root.right = balance called from right (rootIndex+1, right)
+	// don't forget about parent
+
+	@SuppressWarnings("unchecked")
+	public void balance() {
+		Node<T> left = getLeastNodeFrom(root);
+		Node<T> max = getMostNodeFrom(root);
+
+		arrayOfOrderedNodes = new Node[size];
+		fillNodeArrayOrdered(left, max, 0);
+		buildPseudoBalancedTree();
 	}
 
-	private void displayRoot(Node<T> root, int level) {
-		System.out.printf("%s%s\n", FILL_SYMBOLS.repeat(level * N_SYMBOLS_PER_LEVEL), root.obj);
+	private void buildPseudoBalancedTree() {
+		newRoot();
+		setChild(root, 0, arrayOfOrderedNodes.length-1);
 	}
 
+//		displayRoot(root);
+//		displayAsDirectory(root.left);
+//		displayAsDirectory(root.right);
+
+	private void setChild(Node<T> parent, int min, int max) {
+		
+	}
+
+	private void newRoot() {
+		root = arrayOfOrderedNodes[arrayOfOrderedNodes.length / 2];
+	}
+
+	private void fillNodeArrayOrdered(Node<T> min, Node<T> max, int index) {
+
+		arrayOfOrderedNodes[index++] = min;
+		min = min.right != null ? getLeastNodeFrom(min.right) : getGreaterParent(min);
+		if (min != max) {
+			fillNodeArrayOrdered(min, max, index);
+		}
+	}
 }
