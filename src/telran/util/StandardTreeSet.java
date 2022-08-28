@@ -46,4 +46,16 @@ private java.util.TreeSet<T> treeSet = new java.util.TreeSet<>();
 		return treeSet.last();
 	}
 
+	@Override
+	public T ceiling(T pattern) {
+		
+		return treeSet.ceiling(pattern);
+	}
+
+	@Override
+	public T floor(T pattern) {
+		
+		return treeSet.floor(pattern);
+	}
+
 }

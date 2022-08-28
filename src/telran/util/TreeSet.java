@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class TreeSet<T> implements SortedSet<T> {
+public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	private static class Node<T> {
 		T obj;
 		Node<T> parent;
@@ -16,12 +16,11 @@ public class TreeSet<T> implements SortedSet<T> {
 		}
 	}
 
-	private Node <T> [] arrayOfOrderedNodes;
 	private static final String FILL_SYMBOL = " ";
+
 	private static final int N_SYMBOLS_PER_LEVEL = 2;
 
 	private Node<T> root;
-	int size;
 	Comparator<T> comp;
 
 	private Node<T> getLeastNodeFrom(Node<T> node) {
@@ -29,14 +28,6 @@ public class TreeSet<T> implements SortedSet<T> {
 			node = node.left;
 		}
 		return node;
-	}
-
-	private Node<T> getGreaterParent(Node<T> node) {
-
-		while (node.parent != null && node.parent.left != node) {
-			node = node.parent;
-		}
-		return node.parent;
 	}
 
 	private class TreeSetIterator implements Iterator<T> {
@@ -63,7 +54,8 @@ public class TreeSet<T> implements SortedSet<T> {
 		}
 
 		private void updateCurrent() {
-			current = current.right != null ? getLeastNodeFrom(current.right) : getGreaterParent(current);
+			current = getNextNode(current);
+
 		}
 
 		@Override
@@ -215,12 +207,6 @@ public class TreeSet<T> implements SortedSet<T> {
 	}
 
 	@Override
-	public int size() {
-
-		return size;
-	}
-
-	@Override
 	public Iterator<T> iterator() {
 
 		return new TreeSetIterator();
@@ -264,6 +250,7 @@ public class TreeSet<T> implements SortedSet<T> {
 
 	private void displayRoot(Node<T> root, int level) {
 		System.out.printf("%s%s\n", FILL_SYMBOL.repeat(level * N_SYMBOLS_PER_LEVEL), root.obj);
+
 	}
 
 	public void displayAsDirectory() {
@@ -276,6 +263,7 @@ public class TreeSet<T> implements SortedSet<T> {
 			displayAsDirectory(root.left, level + 1);
 			displayAsDirectory(root.right, level + 1);
 		}
+
 	}
 
 	public int height() {
@@ -322,47 +310,93 @@ public class TreeSet<T> implements SortedSet<T> {
 			inversion(root.left);
 			inversion(root.right);
 		}
+
 	}
 
-	// create sorted Node<T>[];
-	// balance creates new root for each part [left, right] of Node<T>[]
-	// root.left = balance called from left (left, rootIndex-1)
-	// root.right = balance called from right (rootIndex+1, right)
-	// don't forget about parent
-
-	@SuppressWarnings("unchecked")
 	public void balance() {
-		Node<T> left = getLeastNodeFrom(root);
-		Node<T> max = getMostNodeFrom(root);
-
-		arrayOfOrderedNodes = new Node[size];
-		fillNodeArrayOrdered(left, max, 0);
-		buildPseudoBalancedTree();
+		// TODO
+		// Create sorted Node<T>[];
+		// balance creates new root for each part [left, right] of Node<T>[]
+		// root.left = balance call from left (left, rootIndex - 1)
+		// root.right = balance call from right(rootIndex + 1, right)
+		// don't forget about parent
+		Node<T>[] arrayNodes = getArrayNodes();
+		root = getBalancedRoot(arrayNodes, 0, size - 1, null);
 	}
 
-	private void buildPseudoBalancedTree() {
-		newRoot();
-		setChild(root, 0, arrayOfOrderedNodes.length-1);
-	}
-
-//		displayRoot(root);
-//		displayAsDirectory(root.left);
-//		displayAsDirectory(root.right);
-
-	private void setChild(Node<T> parent, int min, int max) {
-		
-	}
-
-	private void newRoot() {
-		root = arrayOfOrderedNodes[arrayOfOrderedNodes.length / 2];
-	}
-
-	private void fillNodeArrayOrdered(Node<T> min, Node<T> max, int index) {
-
-		arrayOfOrderedNodes[index++] = min;
-		min = min.right != null ? getLeastNodeFrom(min.right) : getGreaterParent(min);
-		if (min != max) {
-			fillNodeArrayOrdered(min, max, index);
+	private Node<T> getBalancedRoot(Node<T>[] arrayNodes, int left, int right, Node<T> parent) {
+		Node<T> root = null;
+		if (left <= right) {
+			int indexRoot = (left + right) / 2;
+			root = arrayNodes[indexRoot];
+			root.left = getBalancedRoot(arrayNodes, left, indexRoot - 1, root);
+			root.right = getBalancedRoot(arrayNodes, indexRoot + 1, right, root);
+			root.parent = parent;
 		}
+		return root;
 	}
+
+	private Node<T>[] getArrayNodes() {
+		@SuppressWarnings("unchecked")
+		Node<T> res[] = new Node[size];
+		int index = 0;
+		Node<T> current = getLeastNodeFrom(root);
+		while (current != null) {
+			res[index++] = current;
+			current = getNextNode(current);
+		}
+		return res;
+	}
+
+	private Node<T> getGreaterParent(Node<T> node) {
+
+		while (node.parent != null && node.parent.left != node) {
+			node = node.parent;
+		}
+		return node.parent;
+	}
+	private Node<T> getLeasterParent(Node<T> node) {
+		
+		while (node.parent != null && node.parent.right != node) {
+			node = node.parent;
+		}
+		return node.parent;
+	}
+
+	private Node<T> getNextNode(Node<T> current) {
+		return current.right != null ? getLeastNodeFrom(current.right) : getGreaterParent(current);
+	}
+	private Node<T> getPrevNode(Node<T> current) {
+		return current.left != null ? getLeastNodeFrom(current.left) : getLeasterParent(current);
+	}
+
+	@Override
+	public T ceiling(T pattern) {
+		Node <T> res = getNodeOrParent(pattern);
+		if (comp.compare(res.obj, pattern) < 0) {
+			res = findNextOrPrev(res, true);
+		}
+		return res == null? null: res.obj;
+	}
+
+	@Override
+	public T floor(T pattern) {
+		Node <T> res = getNodeOrParent(pattern);
+		if (comp.compare(res.obj, pattern) > 0) {
+			res = findNextOrPrev(res, false);
+		}
+		return res == null? null: res.obj;
+	}
+	
+	private Node<T> findNextOrPrev(Node <T> parent, boolean isCeling) {
+		Node <T> res  = parent;
+		if (isCeling) {
+			res = getNextNode(res);
+		} else {
+			res = getPrevNode(res);
+		}
+		return res;
+	}
+
+
 }
