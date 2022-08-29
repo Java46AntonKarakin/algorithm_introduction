@@ -54,7 +54,7 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 		}
 
 		private void updateCurrent() {
-			current = getNextNode(current);
+			current = getNextOrPrevNode(current, true);
 
 		}
 
@@ -343,60 +343,44 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 		Node<T> current = getLeastNodeFrom(root);
 		while (current != null) {
 			res[index++] = current;
-			current = getNextNode(current);
+			current = getNextOrPrevNode(current, true);
 		}
 		return res;
 	}
 
-	private Node<T> getGreaterParent(Node<T> node) {
-
-		while (node.parent != null && node.parent.left != node) {
-			node = node.parent;
-		}
-		return node.parent;
-	}
-	private Node<T> getLeasterParent(Node<T> node) {
-		
-		while (node.parent != null && node.parent.right != node) {
+	private Node<T> getGreaterOrLeasterParent(Node<T> node, boolean flGreater) {
+		while (node.parent != null && (flGreater ? node.parent.left : node.parent.right) != node) {
 			node = node.parent;
 		}
 		return node.parent;
 	}
 
-	private Node<T> getNextNode(Node<T> current) {
-		return current.right != null ? getLeastNodeFrom(current.right) : getGreaterParent(current);
-	}
-	private Node<T> getPrevNode(Node<T> current) {
-		return current.left != null ? getLeastNodeFrom(current.left) : getLeasterParent(current);
+	private Node<T> getNextOrPrevNode(Node<T> current, boolean flNext) {
+		return flNext ? current.right != null ? getLeastNodeFrom(current.right) : getGreaterOrLeasterParent(current, true)
+				: current.left != null ? getLeastNodeFrom(current.left) : getGreaterOrLeasterParent(current, false);
 	}
 
 	@Override
 	public T ceiling(T pattern) {
-		Node <T> res = getNodeOrParent(pattern);
-		if (comp.compare(res.obj, pattern) < 0) {
-			res = findNextOrPrev(res, true);
+		if (root == null) {
+			return null;
 		}
-		return res == null? null: res.obj;
+		var res = getNodeOrParent(pattern);
+		if (comp.compare(res.obj, pattern) < 0) {
+			res = getNextOrPrevNode(res, true);
+		}
+		return res == null ? null : res.obj;
 	}
 
 	@Override
 	public T floor(T pattern) {
-		Node <T> res = getNodeOrParent(pattern);
+		if (root == null) {
+			return null;
+		}
+		var res = getNodeOrParent(pattern);
 		if (comp.compare(res.obj, pattern) > 0) {
-			res = findNextOrPrev(res, false);
+			res = getNextOrPrevNode(res, false);
 		}
-		return res == null? null: res.obj;
+		return res == null ? null : res.obj;
 	}
-	
-	private Node<T> findNextOrPrev(Node <T> parent, boolean isCeling) {
-		Node <T> res  = parent;
-		if (isCeling) {
-			res = getNextNode(res);
-		} else {
-			res = getPrevNode(res);
-		}
-		return res;
-	}
-
-
 }
