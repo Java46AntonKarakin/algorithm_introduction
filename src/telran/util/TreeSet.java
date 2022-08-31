@@ -314,12 +314,6 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	}
 
 	public void balance() {
-		// TODO
-		// Create sorted Node<T>[];
-		// balance creates new root for each part [left, right] of Node<T>[]
-		// root.left = balance call from left (left, rootIndex - 1)
-		// root.right = balance call from right(rootIndex + 1, right)
-		// don't forget about parent
 		Node<T>[] arrayNodes = getArrayNodes();
 		root = getBalancedRoot(arrayNodes, 0, size - 1, null);
 	}

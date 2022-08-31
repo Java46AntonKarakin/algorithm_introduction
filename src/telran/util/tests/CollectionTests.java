@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import telran.util.Collection;
+import telran.util.HashSet;
 
 abstract class CollectionTests {
 	protected static final int N_NUMBERS = 10000;
@@ -30,7 +31,7 @@ abstract class CollectionTests {
 
 	}
 
-	protected void fillCollection(Integer[]array) {
+	protected void fillCollection(Integer[] array) {
 		for (Integer num : array) {
 			collection.add(num);
 		}
@@ -61,7 +62,7 @@ abstract class CollectionTests {
 	void removeIfTest() {
 		Predicate<Integer> allFalsePredicate = new AllFalsePredicate();
 		// Nothing removed test
-		assertFalse(collection.removeIf(allFalsePredicate));
+		assertFalse(collection.removeIf(t -> false));
 		assertEquals(expected.length, collection.size());
 		/************************************************************/
 		// even numbers removed test
@@ -122,7 +123,7 @@ abstract class CollectionTests {
 		wrongRemove(it);
 	}
 
-	//@Test
+	// @Test
 	void removeIfPerformanceTest() {
 		Predicate<Integer> predicate = new AllFalsePredicate().negate();
 		fillArraySequence(largeArray);
@@ -133,18 +134,14 @@ abstract class CollectionTests {
 		}
 	}
 
-	
-
-	 protected void orderLargeArray() {
-		
-		
+	protected void orderLargeArray() {
 	}
 
 	void fillArraySequence(Integer[] array) {
-		for(int i = 0; i < array.length; i++) {
+		for (int i = 0; i < array.length; i++) {
 			array[i] = i;
 		}
-		
+
 	}
 
 	protected void wrongRemove(Iterator<Integer> it) {
@@ -156,10 +153,46 @@ abstract class CollectionTests {
 		}
 		assertTrue(flException);
 	}
+
 	@Test
 	void emptyCollectionTest() {
 		collection = createCollection();
 		assertArrayEquals(new Integer[0], collection.toArray(new Integer[0]));
 	}
 
+	@Test
+	void cleanTest() {
+		collection.clean();
+		assertTrue(collection.size() == 0);
+	}
+
+
+	@Test
+	void toShuffleArrayTest() {
+		int size = collection.size();
+		Integer[] notShuffledArr = collection.toArray(new Integer[0]);
+		Integer[] shuffledArr = collection.toShuffleArray(new Integer[0]);
+		assertFalse(Arrays.equals(notShuffledArr, shuffledArr));
+		collection = new HashSet<Integer>();
+		fillCollection(shuffledArr);
+		assertEquals(size, collection.size());
+	}
+	
+	// Integer expected[] = { 10, -5, 13, 20, 40, 15 };
+	
+	@Test
+	void streamTest() {
+		assertEquals(93, collection.stream().mapToInt(x -> x).sum());
+		assertArrayEquals(new Integer[] { -5 }, collection.stream().filter(i -> i < 0).toArray(s -> new Integer[s]));
+		
+		Integer[] arr = collection.stream().toArray(s -> new Integer[s]);
+		
+//		assertArrayEquals(new Integer[] { -5, 40 }, arr);
+		assertArrayEquals(expected, arr);
+		
+		// TODO
+		// for only one stream method call to find out min and max values of any
+		// collection
+		// *** using IntStream ***
+	}
 }
