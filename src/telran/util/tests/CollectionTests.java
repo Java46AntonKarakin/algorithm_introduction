@@ -166,7 +166,6 @@ abstract class CollectionTests {
 		assertTrue(collection.size() == 0);
 	}
 
-
 	@Test
 	void toShuffleArrayTest() {
 		int size = collection.size();
@@ -177,22 +176,25 @@ abstract class CollectionTests {
 		fillCollection(shuffledArr);
 		assertEquals(size, collection.size());
 	}
-	
+
 	// Integer expected[] = { 10, -5, 13, 20, 40, 15 };
-	
+
 	@Test
 	void streamTest() {
 		assertEquals(93, collection.stream().mapToInt(x -> x).sum());
 		assertArrayEquals(new Integer[] { -5 }, collection.stream().filter(i -> i < 0).toArray(s -> new Integer[s]));
 		
-		Integer[] arr = collection.stream().toArray(s -> new Integer[s]);
+		var expected = new Integer [] {-5, 40};
+		var actual = new Integer [2];
 		
-//		assertArrayEquals(new Integer[] { -5, 40 }, arr);
-		assertArrayEquals(expected, arr);
+		collection.stream().sorted().forEach(x -> {
+			if (actual[0] == null) {
+				actual[0] = x;
+			} else {
+				actual[1] = x;
+			}
+		});
 		
-		// TODO
-		// for only one stream method call to find out min and max values of any
-		// collection
-		// *** using IntStream ***
+		assertArrayEquals(expected, actual);
 	}
 }
